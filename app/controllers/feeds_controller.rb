@@ -28,14 +28,18 @@ class FeedsController < ApplicationController
   def create
     body = request.body.read
 
+    logger.info("body: #{body}"
+    msg = parse(body)
+    notice(msg)
+
     # ヘッダ HTTP_X_HUB_SIGNATURE の値を取得
     hub_sig = request.env['HTTP_X_HUB_SIGNATURE']
 
-    # HMAC-SHA1 の計算
-    sha1 = OpenSSL::HMAC::hexdigest(OpenSSL::Digest::SHA1.new, VERIFY_TOKEN, body)
+#    # HMAC-SHA1 の計算
+#    sha1 = OpenSSL::HMAC::hexdigest(OpenSSL::Digest::SHA1.new, VERIFY_TOKEN, body)
 
-    logger.info "#### hub_sig = #{hub_sig}"
-    logger.info "#### sha1    = #{sha1}"
+#    logger.info "#### hub_sig = #{hub_sig}"
+#    logger.info "#### sha1    = #{sha1}"
 
     # ファイルとして保存
     # 実際は、HTTP_X_HUB_SIGNATURE の値と
@@ -46,9 +50,27 @@ class FeedsController < ApplicationController
     render nothing: true, status: 200 and return
   end
 
+private
   # return 404 with nothing
   def not_found
     render nothing: true, status: 404
+  end
+
+  # parse xml and organize message
+  def parse(msg)
+    "テストアラートメッセージ"
+    # TODO: XMLパース整形処理
+  end
+
+  # post to localhost irc server
+  def notice(msg)
+    Net::HTTP.start("127.0.0.1", 9987) do |http|
+      header = {
+        'Content-Type' => 'text/javascript+json; charset=utf-8'
+      }
+      body = {user: 'JMA Alert', msg: msg}
+      res = http.post('/', body, header)
+    end
   end
 end
 
