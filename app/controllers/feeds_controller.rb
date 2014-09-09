@@ -2,14 +2,10 @@ class FeedsController < ApplicationController
   DATA_DIR     = "#{Rails.root}/tmp/jmx_data"
   VERIFY_TOKEN = "test_verify_token_for_jma_disaster_info_viewer"
 
-  # application_controller 内の
-  # "protect_from_forgery with: :exception"
-  # を無効にする設定
-  # （ワーニングが出力されないようにするため）
+  # ignore_protect_from forgery
   skip_before_filter :verify_authenticity_token
 
   def index
-    # 各パラメータの取得
     mode         = params['hub.mode']
     topic        = params['hub.topic']
     challenge    = params['hub.challenge']
@@ -30,7 +26,6 @@ class FeedsController < ApplicationController
   end
 
   def create
-    # リクエストボディの取得
     body = request.body.read
 
     # ヘッダ HTTP_X_HUB_SIGNATURE の値を取得
@@ -56,3 +51,4 @@ class FeedsController < ApplicationController
     render nothing: true, status: 404
   end
 end
+
