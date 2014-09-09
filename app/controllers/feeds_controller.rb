@@ -28,7 +28,7 @@ class FeedsController < ApplicationController
   def create
     body = request.body.read
 
-    logger.info("body: #{body}"
+    logger.info("body: #{body}")
     msg = parse(body)
     notice(msg)
 
