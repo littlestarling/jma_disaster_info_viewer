@@ -27,8 +27,6 @@ class FeedsController < ApplicationController
 
   def create
     body = request.body.read
-
-    logger.info("body: #{body}")
     msg = parse(body)
     notice(msg)
 
@@ -45,7 +43,7 @@ class FeedsController < ApplicationController
     # 実際は、HTTP_X_HUB_SIGNATURE の値と
     # verigy_token から計算した HMAC-SHA1 が等しい場合のみ処理を行う
     file_name = "#{Time.now.strftime("%Y%m%d%H%M%S")}_atom.xml"
-    File.open("#{DATA_DIR}#{file_name}", 'wb') { |f| f.write body }
+    File.open("#{DATA_DIR}/#{file_name}", 'wb') { |f| f.write body }
     # TODO: parse data and post data to nadoka.
     render nothing: true, status: 200 and return
   end
@@ -63,12 +61,14 @@ private
   end
 
   # post to localhost irc server
+  # TODO: 強制タイムアウトしないでもリクエスト終端を通知出来るようにする
   def notice(msg)
     Net::HTTP.start("127.0.0.1", 9987) do |http|
       header = {
         'Content-Type' => 'text/javascript+json; charset=utf-8'
       }
       body = {user: 'JMA Alert', msg: msg}
+      http.read_timeout = 3
       res = http.post('/', body, header)
     end
   end
